@@ -1,4 +1,4 @@
-package com.odensala.asr.ui.theme
+package com.odensala.asr.core.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
