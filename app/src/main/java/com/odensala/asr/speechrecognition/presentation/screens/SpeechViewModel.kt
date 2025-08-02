@@ -16,7 +16,7 @@ class SpeechViewModel @Inject constructor(
     private val speechRepository: SpeechRepository
 ) : ViewModel() {
     val uiState: StateFlow<SpeechUiState> = combine(
-        speechRepository.observeRecordingState(),
+        speechRepository.isRecording,
         speechRepository.observeSpeechState()
     ) { recordingState, speechState ->
         SpeechUiState(
