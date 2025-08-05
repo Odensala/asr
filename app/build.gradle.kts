@@ -28,9 +28,27 @@ android {
         }
 
         buildConfigField(
-            "String", 
-            "MIMI_ACCESS_TOKEN",
-            "\"${secretsProperties.getProperty("MIMI_ACCESS_TOKEN", "")}\""
+            "String",
+            "MIMI_CLIENT_ID",
+            "\"${secretsProperties.getProperty("MIMI_APP_ID", "")}:${secretsProperties.getProperty("MIMI_APP_CLIENT_ID", "")}\""
+        )
+
+        buildConfigField(
+            "String",
+            "MIMI_CLIENT_SECRET",
+            "\"${secretsProperties.getProperty("MIMI_CLIENT_SECRET", "")}\""
+        )
+
+        buildConfigField(
+            "String",
+            "MIMI_SCOPE",
+            "\"${secretsProperties.getProperty("MIMI_SCOPE", "https://apis.mimi.fd.ai/auth/asr/websocket-api-service")}\""
+        )
+
+        buildConfigField(
+            "String",
+            "MIMI_AUTH_BASE_URL",
+            "\"https://auth.mimi.fd.ai/\""
         )
 
         buildConfigField(
@@ -84,6 +102,9 @@ dependencies {
     ksp (libs.moshi.kotlin.codegen)
 
     implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.moshi)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)

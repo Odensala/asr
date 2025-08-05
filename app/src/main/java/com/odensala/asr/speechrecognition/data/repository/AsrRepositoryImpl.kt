@@ -1,9 +1,13 @@
 package com.odensala.asr.speechrecognition.data.repository
 
+import com.odensala.asr.BuildConfig
 import com.odensala.asr.speechrecognition.data.datasource.AudioRecorderDataSource
+import com.odensala.asr.speechrecognition.data.datasource.auth.AuthDataSource
 import com.odensala.asr.speechrecognition.data.datasource.websocket.AsrWebSocketDataSource
 import com.odensala.asr.speechrecognition.data.mapper.toDomain
+import com.odensala.asr.speechrecognition.domain.error.AsrError
 import com.odensala.asr.speechrecognition.domain.model.AsrState
+import com.odensala.asr.speechrecognition.domain.model.Token
 import com.odensala.asr.speechrecognition.domain.repository.AsrRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -20,12 +24,41 @@ import javax.inject.Inject
 class AsrRepositoryImpl @Inject constructor(
     private val webSocket: AsrWebSocketDataSource,
     private val audioRecorder: AudioRecorderDataSource,
+    private val authDataSource: AuthDataSource,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : AsrRepository {
 
+    private suspend fun getAccessToken(): Result<Token> {
+        Timber.d("Requesting access token using client credentials")
+        if (BuildConfig.MIMI_CLIENT_ID.isEmpty() || BuildConfig.MIMI_CLIENT_SECRET.isEmpty()) {
+            val message =
+                "No authentication credentials available. Please configure MIMI_ACCESS_TOKEN or client credentials in secrets.properties"
+
+            return Result.failure(IllegalStateException(message))
+        }
+
+        return authDataSource.requestAccessToken(
+            clientId = BuildConfig.MIMI_CLIENT_ID,
+            clientSecret = BuildConfig.MIMI_CLIENT_SECRET,
+            scope = BuildConfig.MIMI_SCOPE
+        )
+    }
+
     override fun observeAsr(): Flow<AsrState> = callbackFlow {
-        // Opens socket
-        val webSocketJob = webSocket.startAsr()
+        // Get access token first
+        val tokenResult = getAccessToken()
+
+        val token = tokenResult.getOrElse { error ->
+            Timber.e("Failed to obtain access token: ${error.message}")
+            trySend(AsrState.Error(AsrError.AuthenticationFailed))
+            close()
+            return@callbackFlow
+        }
+
+        Timber.d("Successfully obtained access token")
+
+        // Opens socket with token
+        val webSocketJob = webSocket.startAsr(token.accessToken)
             .mapNotNull { event ->
                 event.toDomain()
             }

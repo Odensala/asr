@@ -24,11 +24,10 @@ class AsrWebSocketDataSourceImpl @Inject constructor(
 
     private var webSocket: WebSocket? = null
     private val asrResponseDtoAdapter = moshi.adapter(AsrResponseDto::class.java)
-    // private val accessToken =
 
     private var isConnected = false
 
-    override fun startAsr(): Flow<WebSocketEvent> = callbackFlow {
+    override fun startAsr(accessToken: String): Flow<WebSocketEvent> = callbackFlow {
         if (isConnected) {
             return@callbackFlow
         }
@@ -81,8 +80,12 @@ class AsrWebSocketDataSourceImpl @Inject constructor(
 
         val request = Request.Builder()
             .url(BuildConfig.MIMI_ASR_ENDPOINT)
-            //.addHeader("Authorization", "Bearer $accessToken")
+            .addHeader("Authorization", "Bearer $accessToken")
+            .addHeader("x-mimi-process", "asr")
             .build()
+            
+        Timber.d("Connecting WebSocket to: ${BuildConfig.MIMI_ASR_ENDPOINT}")
+        Timber.d("Using access token for WebSocket authentication")
 
         webSocket = okHttpClient.newWebSocket(request, listener)
 
