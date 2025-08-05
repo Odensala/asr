@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,6 +42,8 @@ class SpeechViewModel @Inject constructor(
 
     private fun startRecording() {
         if (asrJob?.isActive == true) return
+
+        Timber.d("Starting ASR")
         asrJob = asrRepository.observeAsr()
             .onEach { asrState -> handleAsrState(asrState) }
             .launchIn(viewModelScope)
@@ -49,6 +52,7 @@ class SpeechViewModel @Inject constructor(
     private fun stopRecording() {
         cancelAsrJob()
         _uiState.update { it.copy(isRecording = false, isConnected = false) }
+        Timber.d("Stopping ASR")
     }
 
     private fun handleAsrState(asrState: AsrState) {
