@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -18,6 +20,24 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val secretsPropertiesFile = rootProject.file("secrets.properties")
+        val secretsProperties = Properties()
+        if (secretsPropertiesFile.exists()) {
+            secretsProperties.load(secretsPropertiesFile.inputStream())
+        }
+
+        buildConfigField(
+            "String", 
+            "MIMI_ACCESS_TOKEN",
+            "\"${secretsProperties.getProperty("MIMI_ACCESS_TOKEN", "")}\""
+        )
+
+        buildConfigField(
+            "String",
+            "MIMI_ASR_ENDPOINT",
+            "\"wss://service.mimi.fd.ai\""
+        )
     }
 
     buildTypes {
