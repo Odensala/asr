@@ -6,12 +6,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,11 +29,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.odensala.asr.R
+import com.odensala.asr.keywords.presentation.components.KeywordDetectedDialog
 
 @Composable
 fun SpeechRecognitionScreen(
-    viewModel: SpeechViewModel = hiltViewModel(),
-    modifier: Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToKeywords: () -> Unit,
+    viewModel: SpeechViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current
@@ -60,8 +65,17 @@ fun SpeechRecognitionScreen(
         isRecording = uiState.isRecording,
         text = uiState.text,
         onRecordingButtonClick = onButtonClick,
+        onNavigateToKeywords = onNavigateToKeywords,
         modifier = modifier
     )
+    
+    // Show keyword detection dialog
+    if (uiState.showKeywordDialog) {
+        KeywordDetectedDialog(
+            detectedKeywords = uiState.detectedKeywords,
+            onDismiss = viewModel::dismissKeywordDialog
+        )
+    }
 }
 
 @Composable
@@ -69,6 +83,7 @@ fun SpeechRecognitionContent(
     isRecording: Boolean,
     text: String,
     onRecordingButtonClick: () -> Unit,
+    onNavigateToKeywords: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -79,14 +94,24 @@ fun SpeechRecognitionContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Button(
-            onClick = onRecordingButtonClick
-        ) {
-            Text(
-                text = if (isRecording) stringResource(R.string.stop_recording) else stringResource(
-                    R.string.start_recording
-                ),
-            )
+        Row {
+            Button(
+                onClick = onRecordingButtonClick
+            ) {
+                Text(
+                    text = if (isRecording) stringResource(R.string.stop_recording) else stringResource(
+                        R.string.start_recording
+                    ),
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            OutlinedButton(
+                onClick = onNavigateToKeywords
+            ) {
+                Text(stringResource(R.string.manage_keywords))
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -110,6 +135,7 @@ fun SpeechRecognitionScreenPreview() {
     SpeechRecognitionContent(
         isRecording = false,
         text = "Sample text",
-        onRecordingButtonClick = {}
+        onRecordingButtonClick = {},
+        onNavigateToKeywords = {}
     )
 }
