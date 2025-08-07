@@ -29,10 +29,10 @@ class AsrRepositoryImpl @Inject constructor(
 ) : AsrRepository {
 
     private suspend fun getAccessToken(): Result<Token> {
-        Timber.d("Requesting access token using client credentials")
+        Timber.d("Requesting access token")
         if (BuildConfig.MIMI_CLIENT_ID.isEmpty() || BuildConfig.MIMI_CLIENT_SECRET.isEmpty()) {
             val message =
-                "No authentication credentials available. Please configure MIMI_ACCESS_TOKEN or client credentials in secrets.properties"
+                "No authentication credentials available"
 
             return Result.failure(IllegalStateException(message))
         }
@@ -45,6 +45,8 @@ class AsrRepositoryImpl @Inject constructor(
     }
 
     override fun observeAsr(): Flow<AsrState> = callbackFlow {
+        Timber.d("AsrRepository: Flow collection started")
+        
         // Get access token first
         val tokenResult = getAccessToken()
 
@@ -78,6 +80,7 @@ class AsrRepositoryImpl @Inject constructor(
         awaitClose {
             webSocketJob.cancel()
             audioRecorderJob.cancel()
+            Timber.d("AsrRepository: Cleanup completed")
         }
     }
 }
