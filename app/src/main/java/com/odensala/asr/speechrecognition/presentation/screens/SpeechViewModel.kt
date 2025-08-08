@@ -28,6 +28,7 @@ class SpeechViewModel @Inject constructor(
     private val detectKeywordsUseCase: DetectKeywordsUseCase
 ) : ViewModel() {
 
+    // Determines whether the flow is collected or not
     private val _isRecordingRequested = MutableStateFlow(false)
 
     // ASR flow that connects/disconnects based on recording state
@@ -52,7 +53,7 @@ class SpeechViewModel @Inject constructor(
         uiState
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
+        started = SharingStarted.WhileSubscribed(2000),
         initialValue = SpeechUiState()
     )
 
@@ -66,6 +67,9 @@ class SpeechViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Clear ASR error states.
+     */
     fun clearError() {
         _uiState.update { uiState ->
             uiState.copy(error = null)

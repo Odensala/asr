@@ -32,10 +32,9 @@ class KeywordRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertKeyword(keyword: Keyword): Long {
+    override suspend fun insertKeyword(keyword: Keyword) {
         val id = keywordDao.insertKeyword(keyword.toEntity())
         Timber.d("Inserted keyword successfully with id: $id")
-        return id
     }
 
     override suspend fun updateKeyword(keyword: Keyword) {

@@ -57,6 +57,12 @@ android {
             "MIMI_ASR_ENDPOINT",
             "\"wss://service.mimi.fd.ai\""
         )
+
+        buildConfigField(
+            "String",
+            "MIMI_APP_NAME",
+            "\"${secretsProperties.getProperty("MIMI_APP_NAME", "")}\""
+        )
     }
 
     buildTypes {
@@ -92,6 +98,10 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.truth)
+    testImplementation(libs.turbine)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -44,9 +44,19 @@ class AsrRepositoryImpl @Inject constructor(
         )
     }
 
+    /**
+     * ASR の callbackFlow を作ります。
+     * WebSocket と AudioRecorder はこの Flow に結びついていて、
+     * Flow が collect ストップすると自動でキャンセルされます。
+     *
+     * 注意：Flow が collect を始める時に新しい token を作ります。
+     * 本当は token をコントロールするクラスを用意して、
+     * トークンを更新したり、もし local storage セーブするなら DataStore に
+     * encrypt して安全にしまうのが理想です。
+     */
     override fun observeAsr(): Flow<AsrState> = callbackFlow {
         Timber.d("AsrRepository: Flow collection started")
-        
+
         // Get access token first
         val tokenResult = getAccessToken()
 
