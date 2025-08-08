@@ -81,7 +81,7 @@ class AsrWebSocketDataSourceImpl @Inject constructor(
         val request = Request.Builder()
             .url(BuildConfig.MIMI_ASR_ENDPOINT)
             .addHeader("Authorization", "Bearer $accessToken")
-            .addHeader("x-mimi-process", "asr")
+            .addHeader("x-mimi-process", BuildConfig.MIMI_APP_NAME)
             .build()
             
         Timber.d("Connecting WebSocket to: ${BuildConfig.MIMI_ASR_ENDPOINT}")
@@ -95,8 +95,12 @@ class AsrWebSocketDataSourceImpl @Inject constructor(
     }
 
     override fun sendAudio(audioData: ByteArray) {
+        if (!isConnected || webSocket == null) {
+            Timber.w("Cannot send audio: WebSocket not connected")
+            return
+        }
+
         webSocket?.send(ByteString.of(*audioData))
-            ?: Timber.w("Cannot send audio: WebSocket not connected")
     }
 
     override fun disconnect() {

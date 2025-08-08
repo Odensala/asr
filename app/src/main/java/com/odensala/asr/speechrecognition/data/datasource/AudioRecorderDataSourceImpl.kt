@@ -82,7 +82,7 @@ class AudioRecorderDataSourceImpl @Inject constructor(
                 val bytesRead = audioRecord?.read(buffer, 0, buffer.size) ?: 0
                 when {
                     bytesRead > 0 -> trySend(buffer.copyOf(bytesRead))
-                    bytesRead == 0 -> Unit // nothing yet
+                    bytesRead == 0 -> Unit
                     else -> cancel("Audio read error ($bytesRead)")
                 }
             }
@@ -94,9 +94,6 @@ class AudioRecorderDataSourceImpl @Inject constructor(
         }
     }
 
-    /**
-     * Stop recording audio
-     */
     override fun stopRecording() {
         if (!isRecording.value) return
 
